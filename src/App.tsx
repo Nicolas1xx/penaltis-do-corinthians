@@ -20,15 +20,15 @@ export default function App() {
 
   function shoot(side: Side) {
     if (busy || finished) return;
-    setBusy(true); setKick(side); setKeeper(null);
+    const sides: Side[] = ["left", "center", "right"];
+    const keeperSide = sides[Math.floor(Math.random() * sides.length)];
+    const goal = keeperSide !== side;
+    setBusy(true); setKick(side); setKeeper(keeperSide); setLastResult(null);
     window.setTimeout(() => {
-      const sides: Side[] = ["left", "center", "right"];
-      const keeperSide = sides[Math.floor(Math.random() * sides.length)];
-      const goal = keeperSide !== side;
       const next = [...shots, goal];
-      setKeeper(keeperSide); setShots(next); setLastResult(goal); setStreak((old) => goal ? old + 1 : 0); setBest((old) => Math.max(old, next.filter(Boolean).length));
-      window.setTimeout(() => { setBusy(false); setKick(null); setKeeper(null); }, 950);
-    }, 620);
+      setShots(next); setLastResult(goal); setStreak((old) => goal ? old + 1 : 0); setBest((old) => Math.max(old, next.filter(Boolean).length));
+      window.setTimeout(() => { setBusy(false); setKick(null); setKeeper(null); }, 1250);
+    }, 560);
   }
 
   function restart() { setShots([]); setKeeper(null); setKick(null); setBusy(false); setLastResult(null); setStreak(0); }
@@ -68,9 +68,9 @@ export default function App() {
           <div className="sccpSeal"><small>SPORT CLUB</small><strong>SCCP</strong><b>1910</b></div>
           <div className="flag flagLeft">AQUI É CORINTHIANS</div><div className="flag flagRight">BANDO DE LOUCOS</div>
           <div className="goalFrame"><div className="net"/><div className={`keeper ${keeper ?? ""}`}><span/><b/><i/></div></div>
-          <div className={`ball ${kick ?? ""}`}>⚽</div>
+          <div className={`ball ${kick ?? ""} ${lastResult === false ? "caught" : lastResult === true ? "inNet" : ""}`}>⚽</div>
           <div className="spot"/>
-          {busy && keeper && <div className={`resultFlash ${lastResult ? "scored" : "saved"}`}><span>{lastResult ? "GOL" : "DEFESA"}</span><small>{lastResult ? `${streak}× SEGUIDOS` : "O GOLEIRO LEU A BATIDA"}</small></div>}
+          {busy && lastResult !== null && <div className={`resultFlash ${lastResult ? "scored" : "saved"}`}><span>{lastResult ? "GOOOOL!" : "DEFESA!"}</span><small>{lastResult ? "A BOLA ESTÁ NA REDE • GOL CONFIRMADO" : "O GOLEIRO AGARROU A BOLA"}</small></div>}
           {lastResult && busy && <div className="confetti">{Array.from({length:18},(_,i)=><i key={i}/>)}</div>}
           <div className="arenaCaption"><span>NEO QUÍMICA ARENA</span><b>VAI, CORINTHIANS!</b><span>CASA DO POVO</span></div>
         </div>

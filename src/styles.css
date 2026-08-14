@@ -19,3 +19,13 @@ nav{height:88px;max-width:1200px;margin:auto;display:grid;grid-template-columns:
 .ball.center{transform:translate(0,-205px) scale(.34) rotate(360deg)}
 .ball.right{transform:translate(125px,-190px) scale(.34) rotate(360deg)}
 @media(max-width:700px){.ball.left{transform:translate(-82px,-148px) scale(.34) rotate(-360deg)}.ball.center{transform:translate(0,-164px) scale(.34) rotate(360deg)}.ball.right{transform:translate(82px,-148px) scale(.34) rotate(360deg)}}
+
+/* Goleiro sincronizado com a batida e confirmação inequívoca do lance */
+.keeper{transition:transform .56s cubic-bezier(.18,.78,.25,1)}
+.keeper.left{transform:translateX(calc(-50% - 125px)) rotate(-46deg)}
+.keeper.right{transform:translateX(calc(-50% + 125px)) rotate(46deg)}
+.ball.caught{filter:drop-shadow(0 0 8px #ffd84a);animation:caughtBall .35s .52s both}
+.ball.inNet{filter:drop-shadow(0 0 12px white)}
+.resultFlash{width:min(92%,650px)}.resultFlash span{font-size:82px}.resultFlash.scored span{color:#fff;text-shadow:6px 6px 0 #c51d2b,10px 10px 0 #000}.resultFlash.saved span{color:#ffd52f;text-shadow:5px 5px 0 #000}.resultFlash small{font-size:11px;padding:7px 14px}
+@keyframes caughtBall{0%{opacity:1;filter:drop-shadow(0 0 0 transparent)}70%{opacity:.88;filter:drop-shadow(0 0 16px #ffd84a)}100%{filter:drop-shadow(0 0 8px #ffd84a);opacity:.95}}
+@media(max-width:700px){.keeper.left{transform:translateX(calc(-50% - 82px)) rotate(-46deg)}.keeper.right{transform:translateX(calc(-50% + 82px)) rotate(46deg)}.resultFlash span{font-size:55px}.resultFlash small{font-size:8px}}
