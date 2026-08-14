@@ -1,29 +1,79 @@
 import { useState } from "react";
-type Side = "left" | "center" | "right";
-const sides: {id:Side; label:string; arrow:string}[] = [{id:"left",label:"Esquerda",arrow:"↙"},{id:"center",label:"Meio",arrow:"↓"},{id:"right",label:"Direita",arrow:"↘"}];
 
-export default function App(){
-  const [shots,setShots]=useState<boolean[]>([]); const [keeper,setKeeper]=useState<Side|null>(null); const [kick,setKick]=useState<Side|null>(null); const [message,setMessage]=useState("Escolha um canto e bata!"); const [busy,setBusy]=useState(false); const [best,setBest]=useState(0);
-  const goals=shots.filter(Boolean).length; const finished=shots.length===5;
-  function shoot(side:Side){
-    if(busy||finished)return; setBusy(true); setKick(side); setKeeper(null); setMessage("Partiu pra bola...");
-    setTimeout(()=>{ const choices:Side[]=["left","center","right"]; const save=choices[Math.floor(Math.random()*3)]; const goal=save!==side; setKeeper(save); const next=[...shots,goal]; setShots(next); setBest(old=>Math.max(old,next.filter(Boolean).length)); setMessage(goal?"GOOOOL DO TIMÃO! ⚽":"O goleiro defendeu!"); setTimeout(()=>{setBusy(false);setKick(null);setKeeper(null)},900); },600);
+type Side = "left" | "center" | "right";
+const options: { id: Side; label: string; arrow: string }[] = [
+  { id: "left", label: "Canto esquerdo", arrow: "↙" },
+  { id: "center", label: "No meio", arrow: "↓" },
+  { id: "right", label: "Canto direito", arrow: "↘" },
+];
+
+export default function App() {
+  const [shots, setShots] = useState<boolean[]>([]);
+  const [keeper, setKeeper] = useState<Side | null>(null);
+  const [kick, setKick] = useState<Side | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [best, setBest] = useState(0);
+  const goals = shots.filter(Boolean).length;
+  const finished = shots.length === 5;
+
+  function shoot(side: Side) {
+    if (busy || finished) return;
+    setBusy(true); setKick(side); setKeeper(null);
+    window.setTimeout(() => {
+      const sides: Side[] = ["left", "center", "right"];
+      const keeperSide = sides[Math.floor(Math.random() * sides.length)];
+      const goal = keeperSide !== side;
+      const next = [...shots, goal];
+      setKeeper(keeperSide); setShots(next); setBest((old) => Math.max(old, next.filter(Boolean).length));
+      window.setTimeout(() => { setBusy(false); setKick(null); setKeeper(null); }, 950);
+    }, 620);
   }
-  function restart(){setShots([]);setKeeper(null);setKick(null);setMessage("Escolha um canto e bata!");setBusy(false)}
-  return <main>
-    <div className="lights l1"/><div className="lights l2"/>
-    <header><div className="badge"><span>SCCP</span><small>1910</small></div><div><p>ARENA DO POVO APRESENTA</p><h1>PÊNALTIS DO <em>CORINTHIANS</em></h1></div><div className="best">RECORDE<strong>{best}/5</strong></div></header>
-    <section className="score"><span>DECISÃO POR PÊNALTIS</span><div className="balls">{[0,1,2,3,4].map(i=><i key={i} className={shots[i]===true?"goal":shots[i]===false?"miss":""}>{shots[i]===true?"✓":shots[i]===false?"×":""}</i>)}</div><b>{goals} GOLS</b></section>
-    <section className="stadium">
-      <div className="crowd">TIMÃO • TIMÃO • TIMÃO • TIMÃO • TIMÃO • TIMÃO</div>
-      <div className="goal"><div className="net"/><div className={`keeper ${keeper||""}`}><span>◉</span><b/></div></div>
-      <div className="field"><div className="spot"/><div className={`ball ${kick||""}`}>⚽</div></div>
-    </section>
-    <section className="controls">
-      <h2>{finished?(goals>=4?"É CAMPEÃO! 🏆":goals>=2?"Boa disputa, Peixão!":"Hoje não deu..."):message}</h2>
-      {finished?<button className="again" onClick={restart}>Jogar novamente</button>:<div className="choices">{sides.map(s=><button key={s.id} onClick={()=>shoot(s.id)} disabled={busy}><b>{s.arrow}</b><span>{s.label}</span></button>)}</div>}
-      <p>{finished?`Você marcou ${goals} de 5 cobranças.`:"Você tem 5 cobranças para mostrar que é decisivo."}</p>
-    </section>
-    <footer>VAI, CORINTHIANS • O TIME DO POVO • AQUI É TIMÃO</footer>
-  </main>
+
+  function restart() { setShots([]); setKeeper(null); setKick(null); setBusy(false); }
+
+  const headline = finished
+    ? goals >= 4 ? "A FIEL EXPLODIU!" : goals >= 2 ? "RAÇA ATÉ O FIM" : "LEVANTA A CABEÇA"
+    : busy ? "É AGORA..." : shots.length === 0 ? "A DECISÃO COMEÇA AQUI" : shots[shots.length - 1] ? "GOOOOOL DO TIMÃO!" : "DEFENDEU O GOLEIRO";
+
+  return (
+    <main>
+      <div className="grain" />
+      <nav>
+        <div className="miniBrand"><span>SCCP</span><b>1910</b></div>
+        <div className="navTitle"><small>SPORT CLUB CORINTHIANS PAULISTA</small><strong>PÊNALTIS DA FIEL</strong></div>
+        <div className="record"><small>MELHOR MARCA</small><strong>{best}<i>/5</i></strong></div>
+      </nav>
+
+      <section className="hero">
+        <div className="matchTag"><i /> NOITE DE DECISÃO <i /></div>
+        <h1>TODO PODEROSO<br/><em>TIMÃO</em></h1>
+        <p>Você tem cinco cobranças. Escolha o canto, encare o goleiro<br/>e faça a Neo Química Arena tremer.</p>
+      </section>
+
+      <section className="gameShell">
+        <div className="scorebar">
+          <div><small>COBRANÇA</small><strong>{Math.min(shots.length + 1, 5)}ª</strong></div>
+          <div className="shotTrack" aria-label={`${goals} gols em ${shots.length} cobranças`}>
+            {[0,1,2,3,4].map((index) => <span key={index} className={shots[index] === true ? "goal" : shots[index] === false ? "miss" : index === shots.length ? "current" : ""}>{shots[index] === true ? "✓" : shots[index] === false ? "×" : index + 1}</span>)}
+          </div>
+          <div className="goals"><small>GOLS</small><strong>{goals}</strong></div>
+        </div>
+
+        <div className="arena">
+          <div className="flag flagLeft">AQUI É CORINTHIANS</div><div className="flag flagRight">BANDO DE LOUCOS</div>
+          <div className="goalFrame"><div className="net"/><div className={`keeper ${keeper ?? ""}`}><span/><b/><i/></div></div>
+          <div className={`ball ${kick ?? ""}`}>⚽</div>
+          <div className="spot"/>
+          <div className="arenaCaption"><span>NEO QUÍMICA ARENA</span><b>VAI, CORINTHIANS!</b><span>CASA DO POVO</span></div>
+        </div>
+
+        <div className="controlPanel">
+          <div className="callout"><small>{finished ? "FIM DA DISPUTA" : busy ? "COBRANÇA EM ANDAMENTO" : "SUA VEZ"}</small><h2>{headline}</h2></div>
+          {finished ? <button className="restart" onClick={restart}><span>↻</span> NOVA DISPUTA</button> : <div className="choices">{options.map((option) => <button key={option.id} onClick={() => shoot(option.id)} disabled={busy}><b>{option.arrow}</b><span>{option.label}</span></button>)}</div>}
+          <p>{finished ? `Placar final: ${goals} gols em 5 cobranças.` : "Escolha onde vai colocar a bola."}</p>
+        </div>
+      </section>
+      <footer><span>🖤</span><b>O TIME DO POVO</b><i/> DESDE 1910 <i/><b>NUNCA VOU TE ABANDONAR</b><span>🤍</span></footer>
+    </main>
+  );
 }
