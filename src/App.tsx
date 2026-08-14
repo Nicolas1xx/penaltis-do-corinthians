@@ -13,6 +13,8 @@ export default function App() {
   const [kick, setKick] = useState<Side | null>(null);
   const [busy, setBusy] = useState(false);
   const [best, setBest] = useState(0);
+  const [lastResult, setLastResult] = useState<boolean | null>(null);
+  const [streak, setStreak] = useState(0);
   const goals = shots.filter(Boolean).length;
   const finished = shots.length === 5;
 
@@ -24,20 +26,21 @@ export default function App() {
       const keeperSide = sides[Math.floor(Math.random() * sides.length)];
       const goal = keeperSide !== side;
       const next = [...shots, goal];
-      setKeeper(keeperSide); setShots(next); setBest((old) => Math.max(old, next.filter(Boolean).length));
+      setKeeper(keeperSide); setShots(next); setLastResult(goal); setStreak((old) => goal ? old + 1 : 0); setBest((old) => Math.max(old, next.filter(Boolean).length));
       window.setTimeout(() => { setBusy(false); setKick(null); setKeeper(null); }, 950);
     }, 620);
   }
 
-  function restart() { setShots([]); setKeeper(null); setKick(null); setBusy(false); }
+  function restart() { setShots([]); setKeeper(null); setKick(null); setBusy(false); setLastResult(null); setStreak(0); }
 
   const headline = finished
     ? goals >= 4 ? "A FIEL EXPLODIU!" : goals >= 2 ? "RAÇA ATÉ O FIM" : "LEVANTA A CABEÇA"
     : busy ? "É AGORA..." : shots.length === 0 ? "A DECISÃO COMEÇA AQUI" : shots[shots.length - 1] ? "GOOOOOL DO TIMÃO!" : "DEFENDEU O GOLEIRO";
 
   return (
-    <main>
+    <main className={lastResult && busy ? "goalMoment" : ""}>
       <div className="grain" />
+      <div className="redSlash slashOne"/><div className="redSlash slashTwo"/>
       <nav>
         <div className="miniBrand"><span>SCCP</span><b>1910</b></div>
         <div className="navTitle"><small>SPORT CLUB CORINTHIANS PAULISTA</small><strong>PÊNALTIS DA FIEL</strong></div>
@@ -51,6 +54,7 @@ export default function App() {
       </section>
 
       <section className="gameShell">
+        <div className="broadcast"><span>AO VIVO</span><b>FINAL • ITAQUERA</b><i>90:00</i></div>
         <div className="scorebar">
           <div><small>COBRANÇA</small><strong>{Math.min(shots.length + 1, 5)}ª</strong></div>
           <div className="shotTrack" aria-label={`${goals} gols em ${shots.length} cobranças`}>
@@ -58,12 +62,16 @@ export default function App() {
           </div>
           <div className="goals"><small>GOLS</small><strong>{goals}</strong></div>
         </div>
+        <div className="pressure"><span style={{width:`${20 + shots.length * 12 + goals * 6}%`}}/><small>PRESSÃO DA FIEL</small></div>
 
         <div className="arena">
+          <div className="sccpSeal"><small>SPORT CLUB</small><strong>SCCP</strong><b>1910</b></div>
           <div className="flag flagLeft">AQUI É CORINTHIANS</div><div className="flag flagRight">BANDO DE LOUCOS</div>
           <div className="goalFrame"><div className="net"/><div className={`keeper ${keeper ?? ""}`}><span/><b/><i/></div></div>
           <div className={`ball ${kick ?? ""}`}>⚽</div>
           <div className="spot"/>
+          {busy && keeper && <div className={`resultFlash ${lastResult ? "scored" : "saved"}`}><span>{lastResult ? "GOL" : "DEFESA"}</span><small>{lastResult ? `${streak}× SEGUIDOS` : "O GOLEIRO LEU A BATIDA"}</small></div>}
+          {lastResult && busy && <div className="confetti">{Array.from({length:18},(_,i)=><i key={i}/>)}</div>}
           <div className="arenaCaption"><span>NEO QUÍMICA ARENA</span><b>VAI, CORINTHIANS!</b><span>CASA DO POVO</span></div>
         </div>
 
